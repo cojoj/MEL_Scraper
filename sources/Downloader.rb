@@ -4,16 +4,12 @@ require 'net/http'
 # We can later use this website content to operate on it
 
 class Downloader
-  attr_accessor :content, :website_url
-  
-  # Initializing objcet with website URL which we want to download
-  def initialize(url)
-    @website_url = URI(url)
-  end
   
   # Downloading source (HTML) of webpage and saving it in content
-  def download_page
-     @content = Net::HTTP.get(@website_url)
+  def self.download_page(url)
+    puts "Downloading source from: #{url}"
+    content = Net::HTTP.get(URI(url))
+    return content
   end
   
 end

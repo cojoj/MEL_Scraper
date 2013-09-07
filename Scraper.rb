@@ -6,6 +6,7 @@ require 'nokogiri'
 html_content = Downloader.download_page('http://www.s-techent.com/ATA100.htm')
 parsed_html = Nokogiri::HTML(html_content)
 
-parsed_html.xpath('/html/body').each do |x|
-  puts x.path
-end
+# Getting whole table with MMELs
+tmp = parsed_html.css("table")[1].css("tr")
+
+puts tmp[6].text

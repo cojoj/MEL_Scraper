@@ -1,12 +1,50 @@
-require_relative 'sources/Downloader'
+require 'open-uri'
 require 'nokogiri'
+require 'json'
 
-# Scraper implementation
+open('http://www.s-techent.com/ATA100.htm') do |f|
 
-html_content = Downloader.download_page('http://www.s-techent.com/ATA100.htm')
-parsed_html = Nokogiri::HTML(html_content)
+  doc = Nokogiri::HTML(f)
+  table = doc.at_xpath('//table[count(tr) > 1]')
 
-# Getting whole table with MMELs
-tmp = parsed_html.css("table")[1].css("tr")
+  chapters = []
+  chapter = nil
 
-puts tmp[6].text
+  table.xpath('tr').each do |tr|
+
+    td = tr.xpath('td')
+    td = td.map { |td| td.content.gsub("\u00A0", ' ').strip }
+    td = td.select { |txt| not txt.empty? }
+    next if td.empty?
+
+    if td[0] =~ /^\d+/
+
+      chapters << chapter if chapter
+
+      chapter = {
+          'chapter'     => td[0],
+          'title'       => td[1],
+          'description' => td[2] || ''
+      }
+
+    elsif td[0] =~ /^-(\d+)/
+
+      section = {
+          'number'      => $1,
+          'title'       => td[1] || '',
+          'description' => td[2] || ''
+      }
+
+      chapter['section'] ||= []
+      chapter['section'] << section
+    end
+
+  end
+
+  chapters << chapter if chapter
+
+  File.open('tmp.json', 'w+') do |f|
+    f << JSON.pretty_generate(chapters)
+  end
+
+end

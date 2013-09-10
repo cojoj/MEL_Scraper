@@ -43,7 +43,7 @@ open('http://www.s-techent.com/ATA100.htm') do |f|
 
   chapters << chapter if chapter
 
-  File.open('tmp.json', 'w+') do |f|
+  File.open('data.json', 'w+') do |f|
     f << JSON.pretty_generate(chapters)
   end
 
